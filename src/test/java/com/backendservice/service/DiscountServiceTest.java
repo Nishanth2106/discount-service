@@ -1,7 +1,6 @@
 package com.backendservice.service;
 
 import com.backendservice.model.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -9,6 +8,8 @@ import org.mockito.InjectMocks;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DiscountServiceTest {
 
@@ -21,50 +22,50 @@ class DiscountServiceTest {
     }
 
     @Test
-     void testEmployeeDiscount() {
-        User user = new User(1, UserType.EMPLOYEE, LocalDate.now());
+    void givenEmployeeUser_whenCalculateNetPayableAmount_thenApplyEmployeeDiscount() {
+        User employee = new User(1, UserType.EMPLOYEE, LocalDate.now());
         Item item1 = new Item(1, "Item1", ItemType.NON_GROCERY, 100);
-        Bill bill = new Bill(1, user, List.of(item1));
+        Bill bill = new Bill(1, employee, List.of(item1));
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
-
-        Assertions.assertEquals(65, netPayableAmount);
+        assertEquals(65, netPayableAmount);
     }
 
+
     @Test
-    void testAffiliateDiscount() {
+    void givenAffiliateUser_whenCalculateNetPayableAmount_thenApplyAffiliateDiscount() {
         User user = new User(1, UserType.AFFILIATE, LocalDate.now());
         Item item1 = new Item(1, "Item1", ItemType.NON_GROCERY, 100);
         Bill bill = new Bill(1, user, List.of(item1));
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
 
-        Assertions.assertEquals(85, netPayableAmount);
+        assertEquals(85, netPayableAmount);
     }
 
     @Test
-    void testCustomerLongTermDiscount() {
+    void givenCustomerWithLongTermMembership_whenCalculateNetPayableAmount_thenApplyCustomerLongTermDiscount() {
         User user = new User(1, UserType.CUSTOMER, LocalDate.now().minusYears(3));
         Item item1 = new Item(1, "Item1", ItemType.GROCERY, 100);
         Bill bill = new Bill(1, user, List.of(item1));
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
 
-        Assertions.assertEquals(95, netPayableAmount);
+        assertEquals(95, netPayableAmount);
     }
 
     @Test
-    void testCustomerLongTermDiscountAndUserType() {
+    void givenEmployeeWithLongTermMembershipAndGroceryItem_whenCalculateNetPayableAmount_thenApplyCustomerLongTermDiscount() {
         User user = new User(1, UserType.EMPLOYEE, LocalDate.now().minusYears(1));
         Item item1 = new Item(1, "Item1", ItemType.GROCERY, 100);
-        Bill bill = new Bill(1, user, Arrays.asList(item1));
+        Bill bill = new Bill(1, user, List.of(item1));
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
-        Assertions.assertEquals(95, netPayableAmount);
+        assertEquals(95, netPayableAmount);
     }
 
     @Test
-    void testAmountBasedDiscount() {
+    void givenCustomerWithItemsEligibleForAmountBasedDiscount_whenCalculateNetPayableAmount_thenApplyAmountBasedDiscount() {
         User user = new User(1, UserType.CUSTOMER, LocalDate.now());
         Item item1 = new Item(1, "Item1", ItemType.NON_GROCERY, 490);
         Item item2 = new Item(2, "Item2", ItemType.NON_GROCERY, 490);
@@ -72,11 +73,11 @@ class DiscountServiceTest {
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
 
-        Assertions.assertEquals(935, netPayableAmount);
+        assertEquals(935, netPayableAmount);
     }
 
     @Test
-    void testPercentageDiscountNotAppliedOnGroceries() {
+    void givenItems_testPercentageDiscountNotAppliedOnGroceries() {
         User user = new User(1, UserType.CUSTOMER, LocalDate.now());
         Item item1 = new Item(1, "Item1", ItemType.GROCERY, 100);
         Item item2 = new Item(2, "Item2", ItemType.NON_GROCERY, 100);
@@ -84,7 +85,7 @@ class DiscountServiceTest {
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
 
-        Assertions.assertEquals(190, netPayableAmount);
+        assertEquals(190, netPayableAmount);
     }
 
     @Test
@@ -96,11 +97,11 @@ class DiscountServiceTest {
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
 
-        Assertions.assertEquals(180, netPayableAmount);
+        assertEquals(180, netPayableAmount);
     }
 
     @Test
-    void testDiscountExcludesGroceries() {
+    void givenCustomer_testDiscountExcludesGroceries() {
         User user = new User(1, UserType.CUSTOMER, LocalDate.now());
         Item groceryItem = new Item(1, "Grocery", ItemType.GROCERY, 100);
         Item nonGroceryItem = new Item(2, "Non-Grocery", ItemType.NON_GROCERY, 100);
@@ -108,22 +109,22 @@ class DiscountServiceTest {
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
 
-        Assertions.assertEquals(190, netPayableAmount);
+        assertEquals(190, netPayableAmount);
     }
 
     @Test
-    void testNoLongTermDiscount() {
+    void givenEmployee_whenNotMoreThan2Years_NotEligibleForDiscount() {
         User user = new User(1, UserType.CUSTOMER, LocalDate.now().minusYears(1));
         Item item = new Item(1, "Item", ItemType.NON_GROCERY, 100);
         Bill bill = new Bill(1, user, List.of(item));
 
         double netPayableAmount = discountService.calculateNetPayableAmount(bill);
 
-        Assertions.assertEquals(95, netPayableAmount);
+        assertEquals(95, netPayableAmount);
     }
 
     @Test
-    void testOtherUserTypesNoLongTermDiscount() {
+    void givenEmployeeAndAffiliateUsers_whenCalculateNetPayableAmount_thenApplyNoLongTermDiscount() {
         User employee = new User(1, UserType.EMPLOYEE, LocalDate.now().minusYears(3));
         User affiliate = new User(2, UserType.AFFILIATE, LocalDate.now().minusYears(3));
         Item item = new Item(1, "Item", ItemType.NON_GROCERY, 100);
@@ -134,7 +135,7 @@ class DiscountServiceTest {
         double employeeNetPayableAmount = discountService.calculateNetPayableAmount(employeeBill);
         double affiliateNetPayableAmount = discountService.calculateNetPayableAmount(affiliateBill);
 
-        Assertions.assertEquals(65, employeeNetPayableAmount);
-        Assertions.assertEquals(85, affiliateNetPayableAmount);
+        assertEquals(65, employeeNetPayableAmount);
+        assertEquals(85, affiliateNetPayableAmount);
     }
 }
