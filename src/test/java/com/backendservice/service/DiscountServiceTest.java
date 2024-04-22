@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-public class DiscountServiceTest {
+class DiscountServiceTest {
 
     @InjectMocks
     private DiscountService discountService;
