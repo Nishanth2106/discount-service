@@ -31,3 +31,32 @@ To run the application, execute the following Maven command:
 
 ```bash
 mvn spring-boot:run
+```
+
+### Test the Api
+````
+curl --location 'http://localhost:6767/calculateNetPayableAmount' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=BF1C8F46F57CD25CC7A63FADB4AD7086' \
+--data '{
+    "billId": 123456789,
+    "user": {
+        "userId": 987654321,
+        "userType": "EMPLOYEE",
+        "registrationDate": "2023-01-15"
+    },
+    "items": [
+        {
+            "itemId": 1,
+            "itemName": "Product 1",
+            "itemType": "GROCERY",
+            "itemPrice": 90
+        },
+        {
+            "itemId": 2,
+            "itemName": "Product 2",
+            "itemType": "GROCERY",
+            "itemPrice": 105
+        }
+    ]
+}'
